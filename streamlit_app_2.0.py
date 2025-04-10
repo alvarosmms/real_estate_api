@@ -45,7 +45,7 @@ import streamlit as st
 
 # Imagen de cabecera
 st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-st.image("banner_enterprise_real_estate.png", use_column_width=True)
+st.image("banner_enterprise_real_estate.png", use_container_width=True)
 st.markdown("<hr style='border: 1px solid #eee; margin-top: 1rem;'></div>", unsafe_allow_html=True)
 
 
