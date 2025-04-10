@@ -60,34 +60,75 @@ def predict():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-# ========== Retrain ==========
+# ========== Retrain Juan ==========
+# @app.route("/retrain", methods=["POST"])
+# def retrain():
+#     try:
+#         df = pd.read_csv("new_data.csv")
+#         expected_cols = {'zona', 'precio', 'habitaciones', 'baños'}
+
+#         if not expected_cols.issubset(set(df.columns)):
+#             return jsonify({"error": "Faltan columnas necesarias"}), 400
+
+#         df['zona'] = df['zona'].astype(str)
+#         X = df[['zona', 'habitaciones', 'baños']]
+#         y = df['precio']
+#         cat_features = ['zona']
+
+#         new_model = CatBoostRegressor(iterations=200, learning_rate=0.1, depth=7, verbose=0)
+#         new_model.fit(X, y, cat_features=cat_features)
+
+#         # Guardar el nuevo modelo
+#         with open(MODEL_PATH, 'wb') as f:
+#             pickle.dump(new_model, f)
+
+#         global model
+#         model = new_model  # Actualiza el modelo en memoria
+
+#         return jsonify({"message": "Modelo reentrenado y guardado correctamente."}), 200
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+# ========== Retrain Álvaro ==========
+
 @app.route("/retrain", methods=["POST"])
 def retrain():
     try:
-        df = pd.read_csv("new_data.csv")
-        expected_cols = {'zona', 'precio', 'habitaciones', 'baños'}
+        data = request.get_json()
 
-        if not expected_cols.issubset(set(df.columns)):
-            return jsonify({"error": "Faltan columnas necesarias"}), 400
+        # Validación de entrada
+        required_fields = {"zona", "precio", "habitaciones", "baños"}
+        if not data or not required_fields.issubset(data.keys()):
+            return jsonify({"error": f"Debes enviar: {required_fields}"}), 400
 
-        df['zona'] = df['zona'].astype(str)
-        X = df[['zona', 'habitaciones', 'baños']]
-        y = df['precio']
-        cat_features = ['zona']
+        # Crear DataFrame con un único registro
+        df = pd.DataFrame([{
+            "zona": str(data["zona"]),
+            "precio": float(data["precio"]),
+            "habitaciones": int(data["habitaciones"]),
+            "baños": int(data["baños"])
+        }])
 
-        new_model = CatBoostRegressor(iterations=200, learning_rate=0.1, depth=7, verbose=0)
+        X = df[["zona", "habitaciones", "baños"]]
+        y = df["precio"]
+        cat_features = ["zona"]
+
+        # Reentrenar con ese único registro (esto es una demo)
+        new_model = CatBoostRegressor(iterations=10, learning_rate=0.5, depth=3, verbose=0)
         new_model.fit(X, y, cat_features=cat_features)
 
-        # Guardar el nuevo modelo
-        with open(MODEL_PATH, 'wb') as f:
+        # Guardar modelo actualizado
+        with open(MODEL_PATH, "wb") as f:
             pickle.dump(new_model, f)
 
         global model
-        model = new_model  # Actualiza el modelo en memoria
+        model = new_model
 
-        return jsonify({"message": "Modelo reentrenado y guardado correctamente."}), 200
+        return jsonify({"message": "Modelo reentrenado con el nuevo dato"}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # ========== Para redespliegue en clase==========
 # @app.route("/hello", methods=["GET"])
