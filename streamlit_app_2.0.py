@@ -82,9 +82,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 zona = st.selectbox('Zona de interés', zonas_geojson, index=zonas_geojson.index(selected_zona) if selected_zona in zonas_geojson else 0)
-
 habitaciones = st.selectbox('🏢 Nº de habitaciones', list(range(0, 8)))
 banos = st.selectbox('🛁 Nº de baños', list(range(0, 5)))
+tipovivienda = st.selectbox('🏠 Tipo de vivienda', ['Piso', 'Ático', 'Chalet', 'Dúplex', 'Estudio', 'Otro'])
+metros = st.number_input('📏 Metros cuadrados aproximados', min_value=10, max_value=1000, value=70)
 
 # ---------- Predicción ----------
 st.markdown('---')
@@ -92,7 +93,9 @@ if st.button('🔍 Predecir precio estimado'):
     params = {
         'zona': zona,
         'habitaciones': habitaciones,
-        'banos': banos
+        'banos': banos,
+        'tipovivienda': tipovivienda,
+        'metros': metros
     }
 
     try:

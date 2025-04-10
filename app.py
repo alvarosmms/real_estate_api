@@ -61,7 +61,8 @@ def predict():
     zona = request.args.get("zona")
     habitaciones = request.args.get("habitaciones", type=int)
     banos = request.args.get("banos", type=int)
-    tipovivienda = request.args.get("tipovivienda", type=int)
+    metros = request.args.get("metros", type=int)
+    tipovivienda = request.args.get("tipovivienda")
 
     if not zona or habitaciones is None or banos is None:
         return jsonify({"error": "Parámetros incompletos"}), 400
@@ -72,6 +73,7 @@ def predict():
             "zona": zona,
             "habitaciones": habitaciones,
             "banos": banos,
+            "metros": metros,
             "tipovivienda": tipovivienda
         }])
 
@@ -85,6 +87,7 @@ def predict():
             "zona": zona,
             "habitaciones": habitaciones,
             "banos": banos,
+            "metros": metros,
             "tipovivienda": tipovivienda,
             "prediccion_precio": round(prediction, 2),
             "mensaje": mensaje
