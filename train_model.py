@@ -17,6 +17,7 @@ df = pd.read_csv("Datos_preprocesados.csv")
 
 # Asegurar tipos correctos
 df["zona"] = df["zona"].astype(str)
+df["tipovivienda"] = df["tipovivienda"].astype(str)
 
 # Separar X e y
 X = df[["zona", "habitaciones", "banos", "tipovivienda", "metros"]]

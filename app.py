@@ -61,10 +61,11 @@ def predict():
     zona = request.args.get("zona")
     habitaciones = request.args.get("habitaciones", type=int)
     banos = request.args.get("banos", type=int)
-    metros = request.args.get("metros", type=int)
     tipovivienda = request.args.get("tipovivienda")
+    metros = request.args.get("metros", type=int)
+    
 
-    if not zona or habitaciones is None or banos is None:
+    if not zona or habitaciones is None or banos is None or tipovivienda is None or metros is None:
         return jsonify({"error": "Parámetros incompletos"}), 400
 
     try:
@@ -73,12 +74,13 @@ def predict():
             "zona": zona,
             "habitaciones": habitaciones,
             "banos": banos,
-            "metros": metros,
-            "tipovivienda": tipovivienda
+            "tipovivienda": tipovivienda,
+            "metros": metros
         }])
 
         # Asegurar tipo string en zona (si hace falta)
         input_data["zona"] = input_data["zona"].astype(str)
+        input_data["tipovivienda"] = input_data["tipovivienda"].astype(str)
 
         prediction = model.predict(input_data)[0]
         mensaje = generar_mensaje_precio(prediction, mae, confianza=0.95)
@@ -87,13 +89,11 @@ def predict():
             "zona": zona,
             "habitaciones": habitaciones,
             "banos": banos,
-            "metros": metros,
             "tipovivienda": tipovivienda,
+            "metros": metros,
             "prediccion_precio": round(prediction, 2),
             "mensaje": mensaje
         })
-    
-        return jsonify(response)
 
     except Exception as e:
         return jsonify({"error": f"Error al realizar la predicción: {str(e)}"}), 500
