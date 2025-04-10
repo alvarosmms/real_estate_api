@@ -42,16 +42,19 @@ except Exception as e:
 # ========== Rutas ==========
 @app.route("/")
 def home():
-    return (
-        "<h2>API para Predicción de Precio de Viviendas 🏡 </h2>"
-        "<p>Usa el endpoint <code>/predict</code> con los parámetros:</p>"
-        "<ul>"
-        "<li><b>zona</b> (str)</li>"
-        "<li><b>habitaciones</b> (int)</li>"
-        "<li><b>banos</b> (int)</li>"
-        "</ul>"
-        "<p>Ejemplo: <code>/predict?zona=Chamberí&habitaciones=3&banos=2</code></p>"
-    )
+    return  """
+        <h2>API para Predicción de Precio de viviendas en Madrid 🏡</h2>
+        <p>Usa el endpoint <code>/predict</code> con los siguientes parámetros:</p>
+        <ul>
+            <li><b>zona</b> (str) - nombre del barrio o distrito</li>
+            <li><b>habitaciones</b> (int) - número de habitaciones</li>
+            <li><b>banos</b> (int) - número de baños</li>
+            <li><b>tipovivienda</b> (str) - tipo de vivienda (Piso, Ático, Chalet...)</li>
+            <li><b>metros</b> (int) - superficie en metros cuadrados</li>
+        </ul>
+        <p><b>Ejemplo:</b></p>
+        <code>/predict?zona=Chamberí&habitaciones=3&banos=2&tipovivienda=Piso&metros=90</code>
+    """
 
 @app.route("/predict", methods=["GET"])
 def predict():
