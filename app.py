@@ -1,141 +1,67 @@
 from flask import Flask, request, jsonify
-import pickle
-import numpy as np
 import pandas as pd
-from catboost import CatBoostRegressor
+import pickle
 import os
+from catboost import CatBoostRegressor
 
 app = Flask(__name__)
 
 # Ruta del modelo
-MODEL_PATH = os.path.join("Modelo", "model.pkl")
+MODEL_PATH = "model.pkl"
 
 # ========== Cargar modelo al iniciar ==========
 try:
     with open(MODEL_PATH, "rb") as f:
         model = pickle.load(f)
-except:
-    model = None
-
-
-try:
-    with open(MODEL_PATH, "rb") as f:
-        model = pickle.load(f)
-    print("✅ Modelo cargado correctamente.")
 except Exception as e:
-    model = None
     print(f"❌ Error al cargar el modelo: {e}")
+    model = None
 
-# ========== Landing page ==========
-@app.route("/", methods=["GET"])
-def landing():
-    return """
-    <h1>API de Predicción de Viviendas 🏡</h1>
-    <p>Endpoints disponibles:</p>
-    <ul>
-        <li><b>/predict</b>: devuelve predicción con parámetros (GET)</li>
-        <li><b>/retrain</b>: reentrena el modelo usando new_data.csv (POST)</li>
-    </ul>
-    """
+# ========== Rutas ==========
+@app.route("/")
+def home():
+    return (
+        "<h2>🏡 API para Predicción de Precio de Viviendas</h2>"
+        "<p>Usa el endpoint <code>/predict</code> con los parámetros:</p>"
+        "<ul>"
+        "<li><b>zona</b> (str)</li>"
+        "<li><b>habitaciones</b> (int)</li>"
+        "<li><b>banos</b> (int)</li>"
+        "</ul>"
+        "<p>Ejemplo: <code>/predict?zona=Chamberí&habitaciones=3&banos=2</code></p>"
+    )
 
-# ========== Predicción ==========
 @app.route("/predict", methods=["GET"])
 def predict():
     if model is None:
-        return jsonify({"error": "El modelo no esta cargado"}), 500
+        return jsonify({"error": "Modelo no cargado"}), 500
+
+    zona = request.args.get("zona")
+    habitaciones = request.args.get("habitaciones", type=int)
+    banos = request.args.get("banos", type=int)
+
+    if not zona or habitaciones is None or banos is None:
+        return jsonify({"error": "Parámetros incompletos"}), 400
 
     try:
-        zona = request.args.get("zona")
-        habitaciones = int(request.args.get("habitaciones"))
-        banos = int(request.args.get("banos"))
-
-        # Preprocesado simple
+        # Crear DataFrame
         input_data = pd.DataFrame([{
             "zona": zona,
             "habitaciones": habitaciones,
             "banos": banos
         }])
-        input_data['zona'] = input_data['zona'].astype(str)
 
-        pred = model.predict(input_data)[0]
+        # Asegurar tipo string en zona (si hace falta)
+        input_data["zona"] = input_data["zona"].astype(str)
+
+        prediction = model.predict(input_data)[0]
 
         return jsonify({
-            "precio_estimado": round(pred, 2),
-            "input": {
-                "zona": zona,
-                "habitaciones": habitaciones,
-                "banos": banos
-            }
+            "zona": zona,
+            "habitaciones": habitaciones,
+            "banos": banos,
+            "prediccion_precio": round(prediction, 2)
         })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
-# ========== Retrain Juan ==========
-# @app.route("/retrain", methods=["POST"])
-# def retrain():
-#     try:
-#         df = pd.read_csv("new_data.csv")
-#         expected_cols = {'zona', 'precio', 'habitaciones', 'banos'}
-
-#         if not expected_cols.issubset(set(df.columns)):
-#             return jsonify({"error": "Faltan columnas necesarias"}), 400
-
-#         df['zona'] = df['zona'].astype(str)
-#         X = df[['zona', 'habitaciones', 'banos']]
-#         y = df['precio']
-#         cat_features = ['zona']
-
-#         new_model = CatBoostRegressor(iterations=200, learning_rate=0.1, depth=7, verbose=0)
-#         new_model.fit(X, y, cat_features=cat_features)
-
-#         # Guardar el nuevo modelo
-#         with open(MODEL_PATH, 'wb') as f:
-#             pickle.dump(new_model, f)
-
-#         global model
-#         model = new_model  # Actualiza el modelo en memoria
-
-#         return jsonify({"message": "Modelo reentrenado y guardado correctamente."}), 200
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
-# ========== Retrain Álvaro ==========
-
-@app.route("/retrain", methods=["POST"])
-def retrain():
-    try:
-        data = request.get_json()
-
-        # Validación de entrada
-        required_fields = {"zona", "precio", "habitaciones", "banos"}
-        if not data or not required_fields.issubset(data.keys()):
-            return jsonify({"error": f"Debes enviar: {required_fields}"}), 400
-
-        # Crear DataFrame con un único registro
-        df = pd.DataFrame([{
-            "zona": str(data["zona"]),
-            "precio": float(data["precio"]),
-            "habitaciones": int(data["habitaciones"]),
-            "banos": int(data["banos"])
-        }])
-
-        X = df[["zona", "habitaciones", "banos"]]
-        y = df["precio"]
-        cat_features = ["zona"]
-
-        # Reentrenar con ese único registro (esto es una demo)
-        new_model = CatBoostRegressor(iterations=10, learning_rate=0.5, depth=3, verbose=0)
-        new_model.fit(X, y, cat_features=cat_features)
-
-        # Guardar modelo actualizado
-        with open(MODEL_PATH, "wb") as f:
-            pickle.dump(new_model, f)
-
-        global model
-        model = new_model
-
-        return jsonify({"message": "Modelo reentrenado con el nuevo dato"}), 200
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -145,6 +71,8 @@ def retrain():
 # def hello():
 #     return "Hola, este es el endpoint opcional para redespliegue 🛠️"
 
+
+# ========== Lanzar servidor ==========
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
