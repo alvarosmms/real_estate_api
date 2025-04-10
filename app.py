@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor
+import os
 
 app = Flask(__name__)
 
@@ -135,5 +136,7 @@ def retrain():
 # def hello():
 #     return "Hola, este es el endpoint opcional para redespliegue 🛠️"
 
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
