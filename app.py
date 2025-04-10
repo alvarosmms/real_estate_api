@@ -17,6 +17,15 @@ try:
 except:
     model = None
 
+
+try:
+    with open(MODEL_PATH, "rb") as f:
+        model = pickle.load(f)
+    print("✅ Modelo cargado correctamente.")
+except Exception as e:
+    model = None
+    print(f"❌ Error al cargar el modelo: {e}")
+
 # ========== Landing page ==========
 @app.route("/", methods=["GET"])
 def landing():
