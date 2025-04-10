@@ -45,12 +45,12 @@ model_pipelines = {}
 test_mse, test_mae, test_r2 = evaluate_model(model, X_test, y_test)
 
 print(f"Modelo: Catboost")
-print(f"  MSE (Test): {test_mse:.3f}")
-print(f"  MAE (Test): {test_mae:.3f}")
-print(f"  R² (Test): {test_r2:.3f}\n")
+print(f"  MSE (Test): {test_mse:.2f}")
+print(f"  MAE (Test): {test_mae:.2f}")
+print(f"  R² (Test): {test_r2:.2f}\n")
 
 # Guardar el modelo
 with open("model.pkl", "wb") as f:
-    pickle.dump(model, f)
+    pickle.dump({"model": model, "mae": test_mae}, f)
 
 print("✅ Modelo entrenado y guardado como model.pkl")

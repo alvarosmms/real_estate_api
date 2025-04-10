@@ -99,8 +99,8 @@ if st.button('🔍 Predecir precio estimado'):
         response = requests.get('https://real-estate-api-22xe.onrender.com/predict', params=params)
         if response.status_code == 200:
             resultado = response.json()
-            precio = resultado['prediccion_precio']
-            st.success(f'💰 Precio estimado: **{precio:,.2f} €**')
+            mensaje = resultado['mensaje']
+            st.success(f'💰 {mensaje}')
         else:
             st.error('❌ No se pudo obtener la predicción. Inténtalo de nuevo más tarde.')
     except Exception as e:
