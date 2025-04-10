@@ -4,6 +4,7 @@ import requests
 import folium
 from streamlit_folium import st_folium
 import json
+from PIL import Image
 
 # ---------- Configuración de la página ----------
 st.set_page_config(
@@ -39,13 +40,29 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------- Cabecera ----------
+
 st.markdown("""
     <div style='text-align: center;'>
-        <h1 style='color:#000;'>🏙️ Enterprise Real Estate</h1>
-        <p style='color: black; font-size: 1.2em;'>Predicción inteligente de precios de vivienda en Madrid</p>
-        <hr style='border: 1px solid #eee;'>
+        <img src='banner_enterprise_real_estate.png' style='width: 100%; max-width: 800px; border-radius: 10px;' />
+        <hr style='border: 1px solid #eee; margin-top: 1rem;'>
     </div>
 """, unsafe_allow_html=True)
+
+# ---------- Color de fondo ----------
+
+st.markdown(
+    """
+    <style>
+        body {
+            background-color: #d4a55d;
+        }
+        .stApp {
+            background-color: #d4a55d;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # ---------- Mapa interactivo ----------
 st.markdown("""
