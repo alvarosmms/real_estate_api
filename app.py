@@ -3,6 +3,7 @@ import pandas as pd
 import pickle
 import os
 from catboost import CatBoostRegressor
+from collections import OrderedDict
 
 app = Flask(__name__)
 
@@ -14,14 +15,14 @@ try:
     with open(MODEL_PATH, "rb") as f:
         model = pickle.load(f)
 except Exception as e:
-    print(f"❌ Error al cargar el modelo: {e}")
+    print(f"Error al cargar el modelo: {e}")
     model = None
 
 # ========== Rutas ==========
 @app.route("/")
 def home():
     return (
-        "<h2>🏡 API para Predicción de Precio de Viviendas</h2>"
+        "<h2>API para Predicción de Precio de Viviendas 🏡 </h2>"
         "<p>Usa el endpoint <code>/predict</code> con los parámetros:</p>"
         "<ul>"
         "<li><b>zona</b> (str)</li>"
@@ -62,8 +63,11 @@ def predict():
             "banos": banos,
             "prediccion_precio": round(prediction, 2)
         })
+    
+        return jsonify(response)
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Error al realizar la predicción: {str(e)}"}), 500
 
 
 # ========== Para redespliegue en clase==========
