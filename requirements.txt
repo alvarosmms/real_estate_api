@@ -3,3 +3,4 @@ numpy
 pandas
 catboost
 scikit-learn
+streamlit

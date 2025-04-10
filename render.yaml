@@ -1,9 +1,10 @@
 services:
   - type: web
-    name: real-estate-api
+    name: enterprise-real-estate-app
     env: python
-    buildCommand: ""
-    startCommand: "python app.py"
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run streamlit_app.py --server.port=10000 --server.address=0.0.0.0
     envVars:
-      - key: PORT
-        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.11
