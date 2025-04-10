@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 
 # Ruta del modelo
-MODEL_PATH = "/Users/alvarosanchez/ONLINE_DS_THEBRIDGE_ALVAROSMMS-1/real_estate_api/Modelo/model.pkl"
+MODEL_PATH = os.path.join("Modelo", "model.pkl")
 
 # ========== Cargar modelo al iniciar ==========
 try:
