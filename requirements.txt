@@ -1,3 +1,5 @@
 flask
-scikit-learn
 numpy
+pandas
+catboost
+scikit-learn
