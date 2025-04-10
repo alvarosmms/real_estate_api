@@ -4,3 +4,5 @@ pandas
 catboost
 scikit-learn
 streamlit
+folium
+streamlit-folium
