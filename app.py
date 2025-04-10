@@ -42,18 +42,18 @@ def landing():
 @app.route("/predict", methods=["GET"])
 def predict():
     if model is None:
-        return jsonify({"error": "El modelo no está cargado"}), 500
+        return jsonify({"error": "El modelo no esta cargado"}), 500
 
     try:
         zona = request.args.get("zona")
         habitaciones = int(request.args.get("habitaciones"))
-        baños = int(request.args.get("baños"))
+        banos = int(request.args.get("banos"))
 
         # Preprocesado simple
         input_data = pd.DataFrame([{
             "zona": zona,
             "habitaciones": habitaciones,
-            "baños": baños
+            "banos": banos
         }])
         input_data['zona'] = input_data['zona'].astype(str)
 
@@ -64,7 +64,7 @@ def predict():
             "input": {
                 "zona": zona,
                 "habitaciones": habitaciones,
-                "baños": baños
+                "banos": banos
             }
         })
     except Exception as e:
@@ -75,13 +75,13 @@ def predict():
 # def retrain():
 #     try:
 #         df = pd.read_csv("new_data.csv")
-#         expected_cols = {'zona', 'precio', 'habitaciones', 'baños'}
+#         expected_cols = {'zona', 'precio', 'habitaciones', 'banos'}
 
 #         if not expected_cols.issubset(set(df.columns)):
 #             return jsonify({"error": "Faltan columnas necesarias"}), 400
 
 #         df['zona'] = df['zona'].astype(str)
-#         X = df[['zona', 'habitaciones', 'baños']]
+#         X = df[['zona', 'habitaciones', 'banos']]
 #         y = df['precio']
 #         cat_features = ['zona']
 
@@ -107,7 +107,7 @@ def retrain():
         data = request.get_json()
 
         # Validación de entrada
-        required_fields = {"zona", "precio", "habitaciones", "baños"}
+        required_fields = {"zona", "precio", "habitaciones", "banos"}
         if not data or not required_fields.issubset(data.keys()):
             return jsonify({"error": f"Debes enviar: {required_fields}"}), 400
 
@@ -116,10 +116,10 @@ def retrain():
             "zona": str(data["zona"]),
             "precio": float(data["precio"]),
             "habitaciones": int(data["habitaciones"]),
-            "baños": int(data["baños"])
+            "banos": int(data["banos"])
         }])
 
-        X = df[["zona", "habitaciones", "baños"]]
+        X = df[["zona", "habitaciones", "banos"]]
         y = df["precio"]
         cat_features = ["zona"]
 
