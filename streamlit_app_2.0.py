@@ -8,7 +8,7 @@ from PIL import Image
 
 # ---------- Configuración de la página ----------
 st.set_page_config(
-    page_title='Enterprise Real Estate',
+    page_title='Enterprise RE',
     page_icon='🏙️',
     layout='centered',
     initial_sidebar_state='collapsed'
@@ -65,9 +65,20 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# ----------  Descripción explicativa ---------- 
+st.markdown("""
+<p style='text-align: center; color: #000000; font-size: 1.1em; margin-top: -0.5rem;'>
+    Selecciona en el mapa la zona en la que estés interesado.<br>
+    O usa el menú desplegable para seleccionarla.<br>
+    Después elige el número de habitaciones, de baños y los metros cuadrados aproximados.<br>
+    Finalmente, pulsa el botón <strong>“Predecir precio estimado”</strong> para obtener una valoración de tu futura vivienda.
+</p>
+<hr style='border: 1px solid #eee; margin-top: 1rem;'>
+""", unsafe_allow_html=True)
+
 # ---------- Mapa interactivo ----------
 st.markdown("""
-<h3 style='color: #000000;'>🗺️ Explora las zonas de Madrid</h3>
+<h3 style='color: #000000;'>Explora el mapa de Madrid</h3>
 """, unsafe_allow_html=True)
 
 
@@ -95,11 +106,8 @@ if st_data and st_data.get('last_active_drawing'):
     selected_zona = props.get('NOMBRE')
 
 # ---------- Inputs ----------
-st.markdown("""
-<h3 style='color: #000000;'> 📌 Selecciona la zona</h3>
-""", unsafe_allow_html=True)
 
-zona = st.selectbox('Zona de interés', zonas_geojson, index=zonas_geojson.index(selected_zona) if selected_zona in zonas_geojson else 0)
+zona = st.selectbox('📍 Zona de interés', zonas_geojson, index=zonas_geojson.index(selected_zona) if selected_zona in zonas_geojson else 0)
 habitaciones = st.selectbox('🏢 Nº de habitaciones', list(range(0, 8)))
 banos = st.selectbox('🛁 Nº de baños', list(range(0, 5)))
 tipovivienda = st.selectbox('🏠 Tipo de vivienda', ['Piso', 'Ático', 'Chalet', 'Dúplex', 'Estudio', 'Otro'])
@@ -107,23 +115,28 @@ metros = st.number_input('📏 Metros cuadrados aproximados', min_value=10, max_
 
 # ---------- Predicción ----------
 st.markdown('---')
-if st.button('🔍 Predecir precio estimado'):
-    params = {
-        'zona': zona,
-        'habitaciones': habitaciones,
-        'banos': banos,
-        'tipovivienda': tipovivienda,
-        'metros': metros
-    }
 
-    try:
-        response = requests.get('https://real-estate-api-22xe.onrender.com/predict', params=params)
-        if response.status_code == 200:
-            resultado = response.json()
-            mensaje = resultado['mensaje']
-            st.success(f'💰 {mensaje}')
-        else:
-            st.error('❌ No se pudo obtener la predicción. Inténtalo de nuevo más tarde.')
-    except Exception as e:
-        st.error(f'⚠️ Error al conectar con la API: {e}')
+# Centrar botón con HTML
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    if st.button('🔍 Predecir precio estimado'):
+        params = {
+            'zona': zona,
+            'habitaciones': habitaciones,
+            'banos': banos,
+            'tipovivienda': tipovivienda,
+            'metros': metros
+        }
+
+        try:
+            response = requests.get('https://real-estate-api-22xe.onrender.com/predict', params=params)
+            if response.status_code == 200:
+                resultado = response.json()
+                mensaje = resultado['mensaje']
+                st.success(f'💰 {mensaje}')
+            else:
+                st.error('❌ No se pudo obtener la predicción. Inténtalo de nuevo más tarde.')
+        except Exception as e:
+            st.error(f'⚠️ Error al conectar con la API: {e}')
+
 
