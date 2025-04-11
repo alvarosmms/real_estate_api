@@ -39,6 +39,53 @@ except Exception as e:
     model = None
     mae = None
 
+#NUEVO ALVARO
+# ========== Endpoint para actualizar modelo ==========
+@app.route("/update-model", methods=["POST"])
+def update_model():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files['file']
+    file.save(MODEL_PATH)
+
+    try:
+        with open(MODEL_PATH, "rb") as f:
+            data = pickle.load(f)
+            global model, mae
+            model = data["model"]
+            mae = data["mae"]
+        return jsonify({"success": "Modelo actualizado correctamente"}), 200
+    except Exception as e:
+        return jsonify({"error": f"No se pudo cargar el modelo: {str(e)}"}), 500
+    
+# ========== Endpoint para recibir el modelo actualizado ==========
+@app.route("/upload_model", methods=["POST"])
+def upload_model():
+    try:
+        if 'model_file' not in request.files:
+            return jsonify({"error": "No se encontró ningún archivo en la solicitud"}), 400
+
+        file = request.files['model_file']
+        if file.filename == '':
+            return jsonify({"error": "Nombre de archivo vacío"}), 400
+
+        file.save("model.pkl")  # Sobrescribe el modelo actual
+
+        # Recargar modelo tras guardarlo
+        global model, mae
+        with open("model.pkl", "rb") as f:
+            data = pickle.load(f)
+            model = data["model"]
+            mae = data["mae"]
+
+        return jsonify({"message": "✅ Modelo actualizado exitosamente"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Error al cargar el nuevo modelo: {str(e)}"}), 500
+
+#
+
 # ========== Rutas ==========
 @app.route("/")
 def home():

@@ -5,6 +5,11 @@ import folium
 from streamlit_folium import st_folium
 import json
 from PIL import Image
+from pathlib import Path
+
+# Ruta donde se guardará el nuevo modelo
+model_filename = "new_model.pkl"
+model_path = Path("/mnt/data") / model_filename
 
 # ---------- Configuración de la página ----------
 st.set_page_config(
@@ -139,4 +144,59 @@ with col2:
         except Exception as e:
             st.error(f'⚠️ Error al conectar con la API: {e}')
 
+#NUEVO ALVARO
+# ---------- Subida nuevo .csv ---------- 
+st.markdown("---")
+st.subheader("🔄 Subir nuevo dataset y reentrenar modelo")
 
+uploaded_file = st.file_uploader("📁 Sube un nuevo archivo CSV con los datos", type=["csv"])
+
+if uploaded_file:
+    new_df = pd.read_csv(uploaded_file)
+
+    required_columns = {"zona", "habitaciones", "banos", "tipovivienda", "metros", "precio"}
+    if not required_columns.issubset(set(new_df.columns)):
+        st.error(f"❌ El archivo debe contener las columnas: {', '.join(required_columns)}")
+    else:
+        from catboost import CatBoostRegressor
+        from sklearn.model_selection import train_test_split
+        from sklearn.metrics import mean_absolute_error
+
+        # Preparar datos
+        new_df["zona"] = new_df["zona"].astype(str)
+        new_df["tipovivienda"] = new_df["tipovivienda"].astype(str)
+
+        X = new_df[["zona", "habitaciones", "banos", "tipovivienda", "metros"]]
+        y = new_df["precio"]
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        model = CatBoostRegressor(
+            iterations=200,
+            learning_rate=0.1,
+            depth=7,
+            cat_features=["zona", "tipovivienda"],
+            eval_metric="RMSE",
+            random_seed=42,
+            verbose=0
+        )
+        model.fit(X_train, y_train)
+        mae = mean_absolute_error(y_test, model.predict(X_test))
+
+        # Guardar modelo
+        import pickle
+        with open("/mnt/data/new_model.pkl", "wb") as f:
+            pickle.dump({"model": model, "mae": mae}, f)
+
+        st.success("✅ Modelo reentrenado correctamente")
+
+        # Enviar modelo a la API
+        st.markdown("📤 ¿Quieres enviar el modelo a la API?")
+        if st.button("🚀 Subir modelo a la API"):
+            files = {"model_file": open("/mnt/data/new_model.pkl", "rb")}
+            response = requests.post("https://real-estate-api-22xe.onrender.com/upload_model", files=files)
+            if response.status_code == 200:
+                st.success("🎉 Modelo actualizado en la API")
+            else:
+                st.error(f"❌ Error al subir el modelo: {response.text}")
+#
