@@ -71,7 +71,7 @@ st.markdown("""
     Selecciona en el mapa la zona en la que estés interesado.<br>
     O usa el menú desplegable para seleccionarla.<br>
     Después elige el número de habitaciones, de baños y los metros cuadrados aproximados.<br>
-    Finalmente, pulsa el botón <strong>“Predecir precio estimado”</strong> para obtener una valoración de tu futura vivienda.
+    Finalmente, pulsa el botón <strong>“Estimar precio”</strong> para obtener una valoración de tu futura vivienda.
 </p>
 <hr style='border: 1px solid #eee; margin-top: 1rem;'>
 """, unsafe_allow_html=True)
@@ -119,7 +119,7 @@ st.markdown('---')
 # Centrar botón con HTML
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    if st.button('🔍 Predecir precio estimado'):
+    if st.button('🔍 Estimar precio'):
         params = {
             'zona': zona,
             'habitaciones': habitaciones,
