@@ -3,6 +3,7 @@ import pandas as pd
 import pickle
 import os
 from catboost import CatBoostRegressor
+from sklearn.metrics import mean_absolute_error
 from collections import OrderedDict
 
 # Mensaje con la predicción
@@ -40,49 +41,50 @@ except Exception as e:
     mae = None
 
 #NUEVO ALVARO
-# ========== Endpoint para actualizar modelo ==========
-@app.route("/update-model", methods=["POST"])
-def update_model():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file uploaded"}), 400
+# ========== Endpoint para reentrenar el modelo ==========
+@app.route("/retrain", methods=["POST"])
+def retrain_model():
+    if "file" not in request.files:
+        return jsonify({"error": "No se encontró el archivo en la petición"}), 400
 
-    file = request.files['file']
-    file.save(MODEL_PATH)
+    file = request.files["file"]
 
     try:
-        with open(MODEL_PATH, "rb") as f:
-            data = pickle.load(f)
-            global model, mae
-            model = data["model"]
-            mae = data["mae"]
-        return jsonify({"success": "Modelo actualizado correctamente"}), 200
+        # Leer CSV
+        df = pd.read_csv(file)
+
+        # Validar columnas requeridas
+        required_columns = {"zona", "habitaciones", "banos", "tipovivienda", "metros", "precio"}
+        if not required_columns.issubset(df.columns):
+            return jsonify({"error": f"Faltan columnas necesarias. Se requieren: {required_columns}"}), 400
+
+        # Asegurar tipos
+        df["zona"] = df["zona"].astype(str)
+        df["tipovivienda"] = df["tipovivienda"].astype(str)
+
+        # Separar X e y
+        X = df[["zona", "habitaciones", "banos", "tipovivienda", "metros"]]
+        y = df["precio"]
+
+        # Reentrenar modelo existente
+        model.fit(X, y, init_model=model)
+
+        # Calcular nuevo MAE
+        y_pred = model.predict(X)
+        new_mae = mean_absolute_error(y, y_pred)
+
+        # Guardar modelo actualizado
+        with open(MODEL_PATH, "wb") as f:
+            pickle.dump({"model": model, "mae": new_mae}, f)
+
+        # Actualizar variables globales
+        global mae
+        mae = new_mae
+
+        return jsonify({"mensaje": "✅ Modelo reentrenado con nuevos datos", "nuevo_mae": round(new_mae, 2)})
+
     except Exception as e:
-        return jsonify({"error": f"No se pudo cargar el modelo: {str(e)}"}), 500
-    
-# ========== Endpoint para recibir el modelo actualizado ==========
-@app.route("/upload_model", methods=["POST"])
-def upload_model():
-    try:
-        if 'model_file' not in request.files:
-            return jsonify({"error": "No se encontró ningún archivo en la solicitud"}), 400
-
-        file = request.files['model_file']
-        if file.filename == '':
-            return jsonify({"error": "Nombre de archivo vacío"}), 400
-
-        file.save("model.pkl")  # Sobrescribe el modelo actual
-
-        # Recargar modelo tras guardarlo
-        global model, mae
-        with open("model.pkl", "rb") as f:
-            data = pickle.load(f)
-            model = data["model"]
-            mae = data["mae"]
-
-        return jsonify({"message": "✅ Modelo actualizado exitosamente"}), 200
-
-    except Exception as e:
-        return jsonify({"error": f"Error al cargar el nuevo modelo: {str(e)}"}), 500
+        return jsonify({"error": f"Error al reentrenar el modelo: {str(e)}"}), 500
 
 #
 
