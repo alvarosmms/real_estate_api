@@ -157,14 +157,7 @@ def predict():
 
 #     return """
 #     Hola, este es el endpoint opcional para redespliegue 🛠️
-    
-#      """
-
-@app.route("/")
-def home():
-    return  """
-        Hola, este es el endpoint opcional para redespliegue 🛠️
-    """
+    #      """
 
 
 # ========== Lanzar servidor ==========
