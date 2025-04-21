@@ -152,9 +152,9 @@ def predict():
 
 
 # ========== Para redespliegue en clase==========
-# @app.route("/hello", methods=["GET"])
-# def hello():
-#     return "Hola, este es el endpoint opcional para redespliegue 🛠️"
+@app.route("/hello", methods=["GET"])
+def hello():
+    return "Hola, este es el endpoint opcional para redespliegue 🛠️"
 
 
 # ========== Lanzar servidor ==========
