@@ -151,14 +151,20 @@ def predict():
         return jsonify({"error": f"Error al realizar la predicción: {str(e)}"}), 500
 
 
-# ========== Para redespliegue en clase==========
-@app.route("/hello", methods=["GET"])
-def hello():
+# # ========== Para redespliegue en clase==========
+# @app.route("/hello", methods=["GET"])
+# def hello():
 
-    return """
-    Hola, este es el endpoint opcional para redespliegue 🛠️
+#     return """
+#     Hola, este es el endpoint opcional para redespliegue 🛠️
     
-     """
+#      """
+
+@app.route("/")
+def home():
+    return  """
+        Hola, este es el endpoint opcional para redespliegue 🛠️
+    """
 
 
 # ========== Lanzar servidor ==========
