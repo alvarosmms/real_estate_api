@@ -103,6 +103,10 @@ def home():
         </ul>
         <p><b>Ejemplo:</b></p>
         <code>/predict?zona=Chamberí&habitaciones=3&banos=2&tipovivienda=Piso&metros=90</code>
+
+    Hola Hola Hola
+
+
     """
 
 @app.route("/predict", methods=["GET"])
