@@ -50,38 +50,54 @@ def retrain_model():
     file = request.files["file"]
 
     try:
-        # Leer CSV
-        df = pd.read_csv(file)
+        # Leer CSV nuevo
+        nuevos_datos = pd.read_csv(file)
 
-        # Validar columnas requeridas
+        # Validar columnas necesarias
         required_columns = {"zona", "habitaciones", "banos", "tipovivienda", "metros", "precio"}
-        if not required_columns.issubset(df.columns):
+        if not required_columns.issubset(nuevos_datos.columns):
             return jsonify({"error": f"Faltan columnas necesarias. Se requieren: {required_columns}"}), 400
 
+        # Cargar datos originales
+        df_original = pd.read_csv("Datos_preprocesados.csv")
+
+        # Unir datasets
+        df_combined = pd.concat([df_original, nuevos_datos], ignore_index=True)
+
         # Asegurar tipos
-        df["zona"] = df["zona"].astype(str)
-        df["tipovivienda"] = df["tipovivienda"].astype(str)
+        df_combined["zona"] = df_combined["zona"].astype(str)
+        df_combined["tipovivienda"] = df_combined["tipovivienda"].astype(str)
 
-        # Separar X e y
-        X = df[["zona", "habitaciones", "banos", "tipovivienda", "metros"]]
-        y = df["precio"]
+        # Separar variables
+        X = df_combined[["zona", "habitaciones", "banos", "tipovivienda", "metros"]]
+        y = df_combined["precio"]
 
-        # Reentrenar modelo existente
-        model.fit(X, y, init_model=model)
+        # Reentrenar modelo
+        new_model = CatBoostRegressor(
+            iterations=200,
+            learning_rate=0.1,
+            depth=7,
+            cat_features=["zona", "tipovivienda"],
+            eval_metric="RMSE",
+            random_seed=42,
+            verbose=0
+        )
+        new_model.fit(X, y)
 
-        # Calcular nuevo MAE
-        y_pred = model.predict(X)
+        # Calcular MAE
+        y_pred = new_model.predict(X)
         new_mae = mean_absolute_error(y, y_pred)
 
         # Guardar modelo actualizado
         with open(MODEL_PATH, "wb") as f:
-            pickle.dump({"model": model, "mae": new_mae}, f)
+            pickle.dump({"model": new_model, "mae": new_mae}, f)
 
-        # Actualizar variables globales
-        global mae
+        # Actualizar modelo global
+        global model, mae
+        model = new_model
         mae = new_mae
 
-        return jsonify({"mensaje": "✅ Modelo reentrenado con nuevos datos", "nuevo_mae": round(new_mae, 2)})
+        return jsonify({"mensaje": "✅ Modelo reentrenado con datos originales + nuevos", "nuevo_mae": round(new_mae, 2)})
 
     except Exception as e:
         return jsonify({"error": f"Error al reentrenar el modelo: {str(e)}"}), 500
