@@ -13,7 +13,7 @@ def generar_mensaje_precio(prediccion, mae, confianza="95%"):
     mensaje = (
         f"🧭 Estimación de precio para tu vivienda:\n\n"
         f"📌 Con una confianza aproximada del {confianza * 100:.0f}%, se estima que el precio adecuado "
-        f"se encuentra entre **{min_price:.0f} €** y **{max_price:.0f} €**.\n\n"
+        f"se encuentra entre **{min_price:,.0f} €** y **{max_price:,.0f} €**.\n\n"
         f"ℹ️ Ten en cuenta que este intervalo depende de los datos proporcionados. El precio más ajustado puede variar en función "
         f"de características adicionales no incluidas, como:\n"
         f"- La localización exacta dentro de la zona\n"
@@ -22,6 +22,9 @@ def generar_mensaje_precio(prediccion, mae, confianza="95%"):
         f"- Servicios como ascensor, calefacción, zonas comunes, etc.\n\n"
         f"🏡 Estos factores pueden influir significativamente en la valoración final."
     )
+
+    mensaje = mensaje.replace(",", ".")
+    
     return mensaje
 
 app = Flask(__name__)
